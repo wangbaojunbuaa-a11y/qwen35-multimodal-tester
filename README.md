@@ -32,9 +32,10 @@ python qwen35_multimodal_tester.py
 
 | 配置项 | 说明 |
 |--------|------|
-| API地址 | 模型服务的 API 端点（如 http://localhost:8000/v1） |
+| API地址 | 模型服务的 API 端点（如 http://localhost:8000/v1），建议不要以 `/` 结尾 |
 | API密钥 | 如需认证，填写 API Key |
 | 模型名称 | 模型标识（如 qwen3.5-397b） |
+| 忽略 SSL 校验 | 适用于公司内网自签名证书场景 |
 
 ## 打包方法
 

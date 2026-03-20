@@ -10,8 +10,11 @@ from tkinter import ttk, filedialog, messagebox, scrolledtext
 import threading
 import requests
 import json
+import urllib3
 from pathlib import Path
 from typing import Optional
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class Qwen35Tester:
@@ -25,6 +28,7 @@ class Qwen35Tester:
         self.api_base = tk.StringVar(value="http://localhost:8000/v1")
         self.api_key = tk.StringVar(value="")
         self.model_name = tk.StringVar(value="qwen3.5-397b")
+        self.ignore_ssl = tk.BooleanVar(value=True)
         
         # 文件路径变量
         self.image_path = tk.StringVar()
@@ -47,6 +51,12 @@ class Qwen35Tester:
         
         ttk.Label(config_frame, text="模型名称:").grid(row=2, column=0, sticky="w", pady=2)
         ttk.Entry(config_frame, textvariable=self.model_name, width=60).grid(row=2, column=1, padx=5, pady=2)
+
+        ttk.Checkbutton(
+            config_frame,
+            text="忽略 SSL 证书校验（适用于公司内网自签名证书）",
+            variable=self.ignore_ssl
+        ).grid(row=3, column=1, sticky="w", padx=5, pady=4)
         
         # 测试区域 - 使用Notebook
         notebook = ttk.Notebook(self.root)
@@ -194,11 +204,13 @@ class Qwen35Tester:
                 self.result_text.insert("end", f"[{test_name}] 请求中...\n\n")
                 self.root.update()
                 
+                base_url = self.api_base.get().rstrip("/")
                 response = requests.post(
-                    f"{self.api_base.get()}/chat/completions",
+                    f"{base_url}/chat/completions",
                     headers=self.get_headers(),
                     json=payload,
-                    timeout=60
+                    timeout=60,
+                    verify=not self.ignore_ssl.get()
                 )
                 
                 if response.status_code == 200:
